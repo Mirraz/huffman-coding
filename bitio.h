@@ -11,6 +11,7 @@ typedef uint_fast8_t bit_or_eof_type;
 class IBitEncoder {
 public:
 	virtual ~IBitEncoder();
+	virtual void encode_bit(bit_type bit) = 0;
 	virtual void encode(const bit_type bits[], size_t count) = 0;
 	virtual void finish() = 0;
 };

@@ -11,6 +11,7 @@ private:
 	uint_fast8_t mask;
 public:
 	BinaryEncoder(ICharPrinter &b_char_printer);
+	void encode_bit(bit_type bit);
 	void encode(const bit_type bits[], size_t count);
 	void finish();
 };

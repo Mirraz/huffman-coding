@@ -6,24 +6,23 @@ BinaryEncoder::BinaryEncoder(ICharPrinter &b_char_printer) :
 
 #define CHAR_MASK_MAX (1<<7)
 
-void BinaryEncoder::encode(const bit_type bits[], size_t count) {
-	size_t i = 0;
-	while (i < count) {
-		if (bits[i]) remainder |= mask;
-		else remainder &= ~mask;
-		++i;
-		if (mask == CHAR_MASK_MAX) {
-			char_printer.putchar(remainder);
-			mask = 1;
-		} else {
-			mask <<= 1;
-		}
+void BinaryEncoder::encode_bit(bit_type bit) {
+	if (bit) remainder |= mask;
+	else remainder &= ~mask;
+	if (mask != CHAR_MASK_MAX) {
+		mask <<= 1;
+	} else {
+		char_printer.putchar(remainder);
+		mask = 1;
 	}
 }
 
+void BinaryEncoder::encode(const bit_type bits[], size_t count) {
+	for (size_t i=0; i<count; ++i) encode_bit(bits[i]);
+}
+
 void BinaryEncoder::finish() {
-	bit_type term_bit = 1;
-	encode(&term_bit, 1);
+	encode_bit(1);
 	if (mask != 1) {
 		while (true) {
 			remainder &= ~mask;
