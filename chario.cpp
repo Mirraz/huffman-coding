@@ -54,6 +54,21 @@ size_t StringCharPrinter::get_length() const {
 
 ICharReader::~ICharReader() {}
 
+FileStreamCharReader::FileStreamCharReader(FILE *b_stream) : stream(b_stream) {
+	next_c = fgetc(stream);
+}
+
+char FileStreamCharReader::getchar() {
+	assert(!is_end());
+	int prev_c = next_c;
+	next_c = fgetc(stream);
+	return prev_c;
+}
+
+bool FileStreamCharReader::is_end() const {
+	return next_c == EOF;
+}
+
 StringCharReader::StringCharReader(const char *b_str, size_t b_length) :
 	length(b_length), idx(0), str(b_str) {}
 

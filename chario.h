@@ -54,6 +54,16 @@ public:
 	virtual bool is_end() const = 0;
 };
 
+class FileStreamCharReader : public ICharReader {
+private:
+	FILE *stream;
+	int next_c;
+public:
+	FileStreamCharReader(FILE *b_stream);
+	char getchar();
+	bool is_end() const;
+};
+
 class StringCharReader : public ICharReader {
 private:
 	size_t length;
