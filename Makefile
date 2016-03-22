@@ -37,6 +37,15 @@ $(BUILD_DIR)/chario.o: $(SRC_DIR)/chario.cpp $(SRC_DIR)/chario.h Makefile
 $(BUILD_DIR)/binary.o: $(SRC_DIR)/binary.cpp $(SRC_DIR)/binary.h $(SRC_DIR)/bitio.h $(SRC_DIR)/chario.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
+
+huffman: $(BUILD_DIR)/huffman.o $(BUILD_DIR)/binary.o $(BUILD_DIR)/bitio.o $(BUILD_DIR)/chario.o
+	$(LD) -o $@ $^ $(LDFLAGS)
+	$(STRIP) $@
+
+$(BUILD_DIR)/huffman.o: $(SRC_DIR)/huffman.cpp $(SRC_DIR)/huffman.h $(SRC_DIR)/symbolio.h $(SRC_DIR)/binary.h $(SRC_DIR)/bitio.h $(SRC_DIR)/chario.h Makefile
+	$(CC) -o $@ $< -c $(CFLAGS)
+
+
 clean:
 	rm -rf $(BUILD_DIR)
 	mkdir $(BUILD_DIR)
