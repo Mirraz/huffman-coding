@@ -23,7 +23,7 @@ void test_char_reader(ICharReader &char_reader) {
 }
 
 void test_chario() {
-	FileStreamCharPrinter fs_char_printer(stdout, 64);
+	LineFileStreamCharPrinter fs_char_printer(stdout, 64);
 	test_char_printer(fs_char_printer);
 	
 	char str[1024];

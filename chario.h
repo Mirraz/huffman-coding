@@ -15,11 +15,20 @@ public:
 class FileStreamCharPrinter : public ICharPrinter {
 private:
 	FILE *stream;
+public:
+	FileStreamCharPrinter(FILE *b_stream);
+	void putchar(char c);
+	void finish();
+};
+
+class LineFileStreamCharPrinter : public ICharPrinter {
+private:
+	FILE *stream;
 	uint_fast16_t line_length;
 	uint_fast16_t line_counter;
 public:
-	FileStreamCharPrinter(FILE *b_stream);
-	FileStreamCharPrinter(FILE *b_stream, uint_fast16_t b_line_length);
+	LineFileStreamCharPrinter(FILE *b_stream);
+	LineFileStreamCharPrinter(FILE *b_stream, uint_fast16_t b_line_length);
 	void putchar(char c);
 	void finish();
 };

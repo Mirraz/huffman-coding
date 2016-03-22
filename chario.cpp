@@ -4,13 +4,22 @@
 
 ICharPrinter::~ICharPrinter() {}
 
-FileStreamCharPrinter::FileStreamCharPrinter(FILE *b_stream) :
-	stream(b_stream), line_length(64), line_counter(0) {}
-
-FileStreamCharPrinter::FileStreamCharPrinter(FILE *b_stream, uint_fast16_t b_line_length) :
-	stream(b_stream), line_length(b_line_length), line_counter(0) {}
+FileStreamCharPrinter::FileStreamCharPrinter(FILE *b_stream) : stream(b_stream) {}
 
 void FileStreamCharPrinter::putchar(char c) {
+	fputc(c, stream);
+}
+
+void FileStreamCharPrinter::finish() {
+}
+
+LineFileStreamCharPrinter::LineFileStreamCharPrinter(FILE *b_stream) :
+	stream(b_stream), line_length(64), line_counter(0) {}
+
+LineFileStreamCharPrinter::LineFileStreamCharPrinter(FILE *b_stream, uint_fast16_t b_line_length) :
+	stream(b_stream), line_length(b_line_length), line_counter(0) {}
+
+void LineFileStreamCharPrinter::putchar(char c) {
 	fputc(c, stream);
 	++line_counter;
 	if (line_counter == line_length) {
@@ -19,7 +28,7 @@ void FileStreamCharPrinter::putchar(char c) {
 	}
 }
 
-void FileStreamCharPrinter::finish() {
+void LineFileStreamCharPrinter::finish() {
 	if (line_counter != 0) {
 		fputc('\n', stream);
 		line_counter = 0;
