@@ -10,12 +10,12 @@
 
 template <typename SYMBOL_TYPE, typename HTREE_IDX_TYPE, HTREE_IDX_TYPE MAX_SYMBOL_COUNT>
 class Huffman {
-
 public:
 typedef SYMBOL_TYPE symbol_type;
 typedef HTREE_IDX_TYPE htree_idx_type;
-static_assert((htree_idx_type)(MAX_SYMBOL_COUNT * 2) > MAX_SYMBOL_COUNT, "MAX_HTREE_SIZE overflow");
-static constexpr htree_idx_type MAX_HTREE_SIZE = MAX_SYMBOL_COUNT * 2;
+static_assert(MAX_SYMBOL_COUNT > 0, "MAX_HTREE_SIZE can't be zero");
+static_assert((htree_idx_type)((MAX_SYMBOL_COUNT - 1) + MAX_SYMBOL_COUNT) > MAX_SYMBOL_COUNT, "MAX_HTREE_SIZE overflow");
+static constexpr htree_idx_type MAX_HTREE_SIZE = (MAX_SYMBOL_COUNT - 1) + MAX_SYMBOL_COUNT;
 
 // decode huffman tree
 struct DHTreeNode {
