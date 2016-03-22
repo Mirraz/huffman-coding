@@ -61,21 +61,6 @@ void test_base64() {
 	printf("\n");
 }
 
-void print_dhtable(const DHTree &dhtree) {
-	printf("{%u,%u,{\n", (unsigned int)dhtree.root, (unsigned int)dhtree.size);
-	for (htree_idx_type i=0; i<dhtree.size; ++i) {
-		const DHTreeNode &dnode = dhtree.htree[i];
-		printf("{%s,{", dnode.is_leaf ? "true" : "false");
-		if (dnode.is_leaf) {
-			printf("%u", (unsigned int)dnode.value.leaf_value);
-		} else {
-			printf("{%u,%u}", (unsigned int)dnode.value.childs[0], (unsigned int)dnode.value.childs[1]);
-		}
-		printf("}},\n");
-	}
-	printf("}}");
-}
-
 void print_base64_string(const char base64_str[], size_t base64_str_length, size_t max_line_length) {
 	size_t i = 0;
 	while (i < base64_str_length) {
@@ -86,7 +71,11 @@ void print_base64_string(const char base64_str[], size_t base64_str_length, size
 }
 
 #define MAX_TEXT_SIZE 256
-void test_huffman_(size_t text_size) {
+void test_huffman_(size_t text_size, bool print_encoded) {
+	typedef uint_fast8_t num_type;
+	typedef Huffman<num_type, uint_fast16_t, 256> huffman_type;
+	typedef huffman_type::DHTree DHTree;
+
 	assert(text_size <= MAX_TEXT_SIZE);
 	char str[MAX_TEXT_SIZE*4/3+1];
 	StringCharPrinter str_char_printer(str, sizeof(str)/sizeof(str[0]));
@@ -101,16 +90,18 @@ void test_huffman_(size_t text_size) {
 	//printf("\n");
 	
 	DHTree dhtree;
-	encode(text, text_size, encoder, dhtree);
+	huffman_type::encode(text, text_size, encoder, dhtree);
 	size_t str_length = str_char_printer.get_length();
 	
-	//printf("dhtree =\n");
-	//print_dhtable(dhtree);
-	//printf("\n");
-	//printf("base64_str_length = %u\n", (unsigned int)str_length);
-	//printf("base64_str =\n");
-	//print_base64_string(str, str_length, 64);
-	//printf("\n");
+	if (print_encoded) {
+		printf("dhtree =\n");
+		huffman_type::print_dhtable(dhtree);
+		printf("\n");
+		printf("base64_str_length = %u\n", (unsigned int)str_length);
+		printf("base64_str =\n");
+		print_base64_string(str, str_length, 64);
+		printf("\n");
+	}
 	
 	/////////
 	
@@ -118,7 +109,7 @@ void test_huffman_(size_t text_size) {
 	Base64Decoder decoder(str_char_reader);
 	
 	num_type dtext[256];
-	size_t dtext_length = decode(dhtree, decoder, dtext, sizeof(dtext)/sizeof(dtext[0]));
+	size_t dtext_length = huffman_type::decode(dhtree, decoder, dtext, sizeof(dtext)/sizeof(dtext[0]));
 	for (size_t i=0; i<dtext_length; ++i) {
 		assert(text[i] == dtext[i]);
 		//printf("%u ", dtext[i]);
@@ -127,8 +118,8 @@ void test_huffman_(size_t text_size) {
 }
 
 void test_huffman() {
-	//test_huffman_(256);
-	for (uint_fast16_t i=1; i<=256; ++i) test_huffman_(i);
+	//test_huffman_(256, true);
+	for (uint_fast16_t i=1; i<=256; ++i) test_huffman_(i, false);
 	printf("huffman test: OK\n");
 }
 
