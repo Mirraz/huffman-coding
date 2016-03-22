@@ -34,6 +34,9 @@ $(BUILD_DIR)/bitio.o: $(SRC_DIR)/bitio.cpp $(SRC_DIR)/bitio.h Makefile
 $(BUILD_DIR)/chario.o: $(SRC_DIR)/chario.cpp $(SRC_DIR)/chario.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
+$(BUILD_DIR)/binary.o: $(SRC_DIR)/binary.cpp $(SRC_DIR)/binary.h $(SRC_DIR)/bitio.h $(SRC_DIR)/chario.h Makefile
+	$(CC) -o $@ $< -c $(CFLAGS)
+
 clean:
 	rm -rf $(BUILD_DIR)
 	mkdir $(BUILD_DIR)
