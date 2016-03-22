@@ -22,7 +22,7 @@ tests: $(BUILD_DIR)/tests.o $(BUILD_DIR)/base64.o $(BUILD_DIR)/bitio.o $(BUILD_D
 	$(LD) -o $@ $^ $(LDFLAGS)
 	$(STRIP) $@
 
-$(BUILD_DIR)/tests.o: $(SRC_DIR)/tests.cpp $(SRC_DIR)/huffman.h $(SRC_DIR)/base64.h $(SRC_DIR)/bitio.h $(SRC_DIR)/chario.h Makefile
+$(BUILD_DIR)/tests.o: $(SRC_DIR)/tests.cpp $(SRC_DIR)/huffman.h $(SRC_DIR)/symbolio.h $(SRC_DIR)/base64.h $(SRC_DIR)/bitio.h $(SRC_DIR)/chario.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
 $(BUILD_DIR)/base64.o: $(SRC_DIR)/base64.cpp $(SRC_DIR)/base64.h $(SRC_DIR)/bitio.h $(SRC_DIR)/chario.h Makefile
