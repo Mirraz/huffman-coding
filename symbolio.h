@@ -49,6 +49,7 @@ public:
 			if (bit) symbol |= mask;
 			else symbol &= ~mask;
 		}
+		result = symbol;
 		return true;
 	}
 };
