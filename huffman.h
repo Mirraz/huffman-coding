@@ -8,21 +8,21 @@
 #include <vector>
 #include "bitio.h"
 
-template <typename NUM_TYPE, typename HTREE_IDX_TYPE, HTREE_IDX_TYPE MAX_NUM_COUNT>
+template <typename SYMBOL_TYPE, typename HTREE_IDX_TYPE, HTREE_IDX_TYPE MAX_SYMBOL_COUNT>
 class Huffman {
 
 public:
-typedef NUM_TYPE num_type;
+typedef SYMBOL_TYPE symbol_type;
 typedef HTREE_IDX_TYPE htree_idx_type;
-static_assert((htree_idx_type)(MAX_NUM_COUNT * 2) > MAX_NUM_COUNT, "MAX_HTREE_SIZE overflow");
-static constexpr htree_idx_type MAX_HTREE_SIZE = MAX_NUM_COUNT * 2;
+static_assert((htree_idx_type)(MAX_SYMBOL_COUNT * 2) > MAX_SYMBOL_COUNT, "MAX_HTREE_SIZE overflow");
+static constexpr htree_idx_type MAX_HTREE_SIZE = MAX_SYMBOL_COUNT * 2;
 
 // decode huffman tree
 struct DHTreeNode {
 	bool is_leaf;
 	union {
 		htree_idx_type childs[2];
-		num_type leaf_value;
+		symbol_type leaf_value;
 	} value;
 };
 
@@ -42,10 +42,10 @@ struct HTreeNode {
 	htree_idx_type parent_idx;
 	bit_type code;
 	bool is_leaf;
-	num_type leaf_value;
+	symbol_type leaf_value;
 	
 	HTreeNode() : weight(0), parent_idx(0), code(0), is_leaf(false), leaf_value(0) {}
-	HTreeNode(weight_type b_weight, num_type b_leaf_value) :
+	HTreeNode(weight_type b_weight, symbol_type b_leaf_value) :
 		weight(b_weight), parent_idx(0), code(0), is_leaf(true), leaf_value(b_leaf_value) {}
 	HTreeNode(weight_type b_weight) :
 		weight(b_weight), parent_idx(0), code(0), is_leaf(false), leaf_value(0) {}
@@ -69,12 +69,12 @@ struct hcode {
 	bit_type bits[MAX_HCODE_LEN];
 };
 
-typedef std::map<num_type, hcode> code_map_type;
+typedef std::map<symbol_type, hcode> code_map_type;
 
-static void make_huffman_codes(const num_type array[], size_t array_size, code_map_type &code_map, DHTree &dhtree) {
+static void make_huffman_codes(const symbol_type array[], size_t array_size, code_map_type &code_map, DHTree &dhtree) {
 	assert(code_map.empty());
 
-	typedef std::map<num_type, weight_type> frequency_map_type;
+	typedef std::map<symbol_type, weight_type> frequency_map_type;
 	typedef typename frequency_map_type::iterator frequency_map_iterator_type;
 	frequency_map_type frequency;
 	for (size_t i=0; i<array_size; ++i) {
@@ -122,7 +122,7 @@ static void make_huffman_codes(const num_type array[], size_t array_size, code_m
 		hcode_len_type code_length = 0;
 		
 		htree_idx_type idx = i;
-		// maybe i == root_idx already in case if all input numbers are equal
+		// maybe i == root_idx already in case if all input symbols are equal
 		do {
 			code_bits[code_length++] = htree[idx].code;
 			idx = htree[idx].parent_idx;
@@ -177,7 +177,7 @@ static void make_huffman_codes(const num_type array[], size_t array_size, code_m
 }
 
 public:
-static void encode(const num_type array[], size_t array_size, IBitEncoder &encoder, DHTree &dhtree) {
+static void encode(const symbol_type array[], size_t array_size, IBitEncoder &encoder, DHTree &dhtree) {
 	code_map_type code_map;
 	make_huffman_codes(array, array_size, code_map, dhtree);
 	//for (code_map_type::iterator it=code_map.begin(); it!=code_map.end(); ++it) {
@@ -194,7 +194,7 @@ static void encode(const num_type array[], size_t array_size, IBitEncoder &encod
 	encoder.finish();
 }
 
-static size_t decode(const DHTree &dhtree, IBitDecoder &decoder, num_type array[], size_t array_size) {
+static size_t decode(const DHTree &dhtree, IBitDecoder &decoder, symbol_type array[], size_t array_size) {
 	size_t array_length = 0;
 	
 	htree_idx_type idx = dhtree.root;
