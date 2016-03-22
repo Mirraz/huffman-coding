@@ -58,7 +58,7 @@ bit_or_eof_type Base64Decoder::decode_bit() {
 		rem_counter = 6;
 		if (char_reader.is_end()) {
 			assert(remainder != 0);
-			for (uint_fast8_t mask = 1 << 5; !(remainder & mask) ; mask >>= 1) --rem_counter;
+			for (uint_fast8_t mask = 1 << 5; !(remainder & mask); mask >>= 1) --rem_counter;
 			assert(rem_counter > 0 && rem_counter <= 6);
 			--rem_counter;
 			if (rem_counter == 0) return BIT_EOF_VALUE;
