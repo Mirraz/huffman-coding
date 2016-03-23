@@ -253,12 +253,12 @@ void test_char_symbolio() {
 	
 	char str[1024];
 	StringCharOut string_char_out(str, sizeof(str)/sizeof(str[0]));
-	CharSymbolOut<symbol_type> symbol_out(string_char_out);
+	CharSymbolOut<symbol_type, 4> symbol_out(string_char_out);
 	for (size_t i=0; i<data_size; ++i) symbol_out.put(data[i]);
 	size_t str_length = string_char_out.get_length();
 	
 	StringCharIn string_char_in(str, str_length);
-	CharSymbolIn<symbol_type> symbol_in(string_char_in);
+	CharSymbolIn<symbol_type, 4> symbol_in(string_char_in);
 	for (size_t i=0; i<data_size; ++i) {
 		symbol_type symbol;
 		assert(symbol_in.get(symbol));

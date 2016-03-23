@@ -6,11 +6,12 @@
 #include "isymbolio.h"
 #include "ichario.h"
 
-template <typename SYMBOL_TYPE>
+// SYMBOL_SIZE - in bytes
+template <typename SYMBOL_TYPE, size_t SYMBOL_SIZE>
 class CharSymbolOut : public ISymbolOut<SYMBOL_TYPE>  {
+static_assert((SYMBOL_SIZE << 3) >> 3 == SYMBOL_SIZE, "SYMBOL_SIZE overflow");
 public:
 	typedef SYMBOL_TYPE symbol_type;
-	static constexpr size_t SYMBOL_SIZE = sizeof(symbol_type);
 	
 private:
 	ICharOut &char_out;
@@ -30,11 +31,12 @@ public:
 	}
 };
 
-template <typename SYMBOL_TYPE>
+// SYMBOL_SIZE - in bytes
+template <typename SYMBOL_TYPE, size_t SYMBOL_SIZE>
 class CharSymbolIn : public ISymbolIn<SYMBOL_TYPE> {
+static_assert((SYMBOL_SIZE << 3) >> 3 == SYMBOL_SIZE, "SYMBOL_SIZE overflow");
 public:
 	typedef SYMBOL_TYPE symbol_type;
-	static constexpr size_t SYMBOL_SIZE = sizeof(symbol_type);
 	
 private:
 	ICharIn &char_in;
