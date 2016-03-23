@@ -190,13 +190,18 @@ void test_bit_symbol_in_stdin() {
 	printf("\n");
 }
 
+template <typename symbol_type>
+void make_test_data(symbol_type *data, size_t data_size) {
+	for (size_t i=0; i<data_size; ++i) data[i] = i * i;
+}
+
 void test_bit_symbolio() {
 	char str[1024];
 	typedef uint32_t symbol_type;
 	const size_t symbol_bsize = sizeof(symbol_type) * 8;
-	symbol_type data[256];
+	symbol_type data[16];
 	const size_t data_size = 16;
-	for (size_t i=0; i<data_size; ++i) data[i] = i * i;
+	make_test_data<symbol_type>(data, data_size);
 
 	StringCharOut string_char_out(str, sizeof(str)/sizeof(str[0]));
 	CharBitOut bit_out(string_char_out);
@@ -215,6 +220,28 @@ void test_bit_symbolio() {
 	}
 	symbol_type symbol;
 	assert(!bit_symbol_in.get(symbol));
+}
+
+void test_array_symbolio() {
+	typedef uint32_t symbol_type;
+	symbol_type data[256];
+	const size_t data_size = sizeof(data) / sizeof(data[0]);
+	make_test_data<symbol_type>(data, data_size);
+	
+	symbol_type storage[256];
+	ArraySymbolOut<symbol_type> array_symbol_out(storage, sizeof(storage)/sizeof(storage[0]));
+	for (size_t i=0; i<data_size; ++i) array_symbol_out.put(data[i]);
+	size_t storage_length = array_symbol_out.get_length();
+	assert(storage_length == data_size);
+	
+	ArraySymbolIn<symbol_type> array_symbol_in(storage, storage_length);
+	for (size_t i=0; i<data_size; ++i) {
+		symbol_type symbol;
+		assert(array_symbol_in.get(symbol));
+		assert(symbol == data[i]);
+	}
+	symbol_type symbol;
+	assert(!array_symbol_in.get(symbol));
 }
 
 void print_base64_string(const char base64_str[], size_t base64_str_length, size_t max_line_length) {
@@ -283,6 +310,7 @@ void tests_suite() {
 	//test_char_bitio();
 	//test_bit_symbolio();
 	//test_base64_char_bitio();
+	//test_array_symbolio();
 	test_huffman();
 }
 
