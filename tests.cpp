@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <inttypes.h>
 #include "file_chario.h"
@@ -8,6 +9,8 @@
 #include "char_bitio.h"
 #include "base64_char_bitio.h"
 #include "bit_symbolio.h"
+#include "array_symbolio.h"
+#include "huffman.h"
 
 static const char test_char_str[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 constexpr size_t test_char_str_size = sizeof(test_char_str)/sizeof(test_char_str[0]);
@@ -214,11 +217,73 @@ void test_bit_symbolio() {
 	assert(!bit_symbol_in.get(symbol));
 }
 
+void print_base64_string(const char base64_str[], size_t base64_str_length, size_t max_line_length) {
+	size_t i = 0;
+	while (i < base64_str_length) {
+		putchar(base64_str[i]);
+		++i;
+		if (i % max_line_length == 0 && i != base64_str_length) putchar('\n');
+	}
+}
+
+#define MAX_TEXT_SIZE 256
+void test_huffman_(size_t text_size, bool print_encoded) {
+	typedef uint_fast8_t symbol_type;
+	typedef Huffman<symbol_type, uint_fast16_t, 256> huffman_type;
+	typedef huffman_type::DHTree DHTree;
+
+	assert(text_size <= MAX_TEXT_SIZE);
+	char str[MAX_TEXT_SIZE*4/3+1];
+	StringCharOut string_char_out(str, sizeof(str)/sizeof(str[0]));
+	Base64CharBitOut bit_out(string_char_out);
+	
+	symbol_type text[MAX_TEXT_SIZE];
+	for (size_t i=0; i<text_size; ++i) {
+		symbol_type t = (i | (i % 3) | (i % 7)) & 0x0F;
+		text[i] = t;
+	}
+	
+	DHTree dhtree;
+	huffman_type::encode(text, text_size, bit_out, dhtree);
+	size_t str_length = string_char_out.get_length();
+	
+	if (print_encoded) {
+		printf("dhtree =\n");
+		huffman_type::print_dhtable(dhtree);
+		printf("\n");
+		printf("base64_str_length = %u\n", (unsigned int)str_length);
+		printf("base64_str =\n");
+		print_base64_string(str, str_length, 64);
+		printf("\n");
+	}
+	
+	/////////
+	
+	StringCharIn string_char_in(str, str_length);
+	Base64CharBitIn bit_in(string_char_in);
+	
+	symbol_type dtext[256];
+	ArraySymbolOut<symbol_type> array_symbol_out(dtext, sizeof(dtext)/sizeof(dtext[0]));
+	
+	huffman_type::decode(dhtree, bit_in, array_symbol_out);
+	
+	size_t dtext_length = array_symbol_out.get_length();
+	for (size_t i=0; i<dtext_length; ++i) {
+		assert(text[i] == dtext[i]);
+	}
+}
+
+void test_huffman() {
+	//test_huffman_(256, true);
+	for (uint_fast16_t i=1; i<=256; ++i) test_huffman_(i, false);
+}
+
 void tests_suite() {
 	//test_string_chario();
 	//test_char_bitio();
 	//test_bit_symbolio();
-	test_base64_char_bitio();
+	//test_base64_char_bitio();
+	test_huffman();
 }
 
 int main() {

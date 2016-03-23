@@ -6,8 +6,8 @@
 #include <map>
 #include <queue>
 #include <vector>
-#include "bitio.h"
-#include "symbolio.h"
+#include "ibitio.h"
+#include "bit_symbolio.h"
 
 template <typename SYMBOL_TYPE, typename HTREE_IDX_TYPE, HTREE_IDX_TYPE MAX_SYMBOL_COUNT>
 class Huffman {
@@ -178,7 +178,7 @@ static void make_huffman_codes(const symbol_type array[], size_t array_size, cod
 }
 
 public:
-static void encode(const symbol_type array[], size_t array_size, IBitEncoder &encoder, DHTree &dhtree) {
+static void encode(const symbol_type array[], size_t array_size, IBitOut &bit_out, DHTree &dhtree) {
 	code_map_type code_map;
 	make_huffman_codes(array, array_size, code_map, dhtree);
 	//for (code_map_type::iterator it=code_map.begin(); it!=code_map.end(); ++it) {
@@ -190,27 +190,23 @@ static void encode(const symbol_type array[], size_t array_size, IBitEncoder &en
 	
 	for (size_t i=0; i<array_size; ++i) {
 		hcode &code = code_map[array[i]];
-		encoder.encode(code.bits, code.length);
+		bit_out.put_array(code.bits, code.length);
 	}
-	encoder.finish();
+	bit_out.finish();
 }
 
-static size_t decode(const DHTree &dhtree, IBitDecoder &decoder, symbol_type array[], size_t array_size) {
-	size_t array_length = 0;
-	
+static void decode(const DHTree &dhtree, IBitIn &bit_in, ISymbolOut<SYMBOL_TYPE> &symbol_out) {
 	htree_idx_type idx = dhtree.root;
 	while (true) {
-		bit_or_eof_type bit = decoder.decode_bit();
-		if (bit == BIT_EOF_VALUE) break;
+		IBitIn::bit_or_eof_type bit = bit_in.get_with_eof();
+		if (bit == IBitIn::EOF_VALUE) break;
 		if (! dhtree.htree[idx].is_leaf) idx = dhtree.htree[idx].value.childs[bit];
 		if (dhtree.htree[idx].is_leaf) {
-			assert(array_length < array_size);
-			array[array_length++] = dhtree.htree[idx].value.leaf_value;
+			symbol_out.put(dhtree.htree[idx].value.leaf_value);
 			idx = dhtree.root;
 		}
 	}
 	assert(idx == dhtree.root);
-	return array_length;
 }
 
 static void fprint_dhtable(FILE *stream, const DHTree &dhtree) {
@@ -235,87 +231,87 @@ static void print_dhtable(const DHTree &dhtree) {
 	fprint_dhtable(stdout, dhtree);
 }
 
-// symbol_size - size of symbol in bits
-static void dhtree_encode(const DHTree &dhtree, IBitEncoder &encoder, size_t symbol_size) {
+// symbol_bsize - size of symbol in bits
+static void dhtree_encode(const DHTree &dhtree, IBitOut &bit_out, size_t symbol_bsize) {
 	// find size in bits of dhtree.size
 	assert(dhtree.size > 0);
-	size_t htree_idx_type_size = 0;
-	for (htree_idx_type tsize = dhtree.size; tsize > 0; tsize >>= 1) ++htree_idx_type_size;
+	size_t htree_idx_type_bsize = 0;
+	for (htree_idx_type tsize = dhtree.size; tsize > 0; tsize >>= 1) ++htree_idx_type_bsize;
 	
-	typename SymbolIO<symbol_type>::SymbolEncoder    symbol_encoder(encoder, symbol_size);
-	typename SymbolIO<htree_idx_type>::SymbolEncoder htree_idx_encoder(encoder, htree_idx_type_size);
+	BitSymbolOut<symbol_type> symbol_out(bit_out, symbol_bsize);
+	BitSymbolOut<htree_idx_type> htree_idx_out(bit_out, htree_idx_type_bsize);
 
-	// encode symbol_size-1 by unary coding
-	assert(symbol_size > 0);
-	for (size_t i=1; i<symbol_size; ++i) encoder.encode_bit(0);
-	encoder.encode_bit(1);
+	// encode symbol_bsize-1 by unary coding
+	assert(symbol_bsize > 0);
+	for (size_t i=1; i<symbol_bsize; ++i) bit_out.put(0);
+	bit_out.put(1);
 	
-	// encode htree_idx_type_size-1 by unary coding
-	assert(htree_idx_type_size > 0);
-	for (size_t i=1; i<htree_idx_type_size; ++i) encoder.encode_bit(0);
-	encoder.encode_bit(1);
+	// encode htree_idx_type_bsize-1 by unary coding
+	assert(htree_idx_type_bsize > 0);
+	for (size_t i=1; i<htree_idx_type_bsize; ++i) bit_out.put(0);
+	bit_out.put(1);
 	
 	// encode dhtree
 	assert(dhtree.root == 0);
-	htree_idx_encoder.encode(dhtree.size);
+	htree_idx_out.put(dhtree.size);
 	
 	for (htree_idx_type i=0; i<dhtree.size; ++i) {
 		const DHTreeNode &dnode = dhtree.htree[i];
-		encoder.encode_bit(dnode.is_leaf);
+		bit_out.put(dnode.is_leaf);
 		if (dnode.is_leaf) {
-			symbol_encoder.encode(dnode.value.leaf_value);
+			symbol_out.put(dnode.value.leaf_value);
 		} else {
-			htree_idx_encoder.encode(dnode.value.childs[0]);
-			htree_idx_encoder.encode(dnode.value.childs[1]);
+			htree_idx_out.put(dnode.value.childs[0]);
+			htree_idx_out.put(dnode.value.childs[1]);
 		}
 	}
 	
-	encoder.finish();
+	bit_out.finish();
 }
 
 // returns success
-static bool dhtree_decode(IBitDecoder &decoder, DHTree &dhtree) {
-	bit_or_eof_type bit;
+static bool dhtree_decode(IBitIn &bit_in, DHTree &dhtree) {
+	IBitIn::bit_or_eof_type bit;
 	
-	// decode unary encoded symbol_size-1
-	size_t symbol_size = 0;
+	// decode unary encoded symbol_bsize-1
+	size_t symbol_bsize = 0;
 	do {
-		bit = decoder.decode_bit();
-		if (bit == BIT_EOF_VALUE) return false;
-		++symbol_size;
+		bit = bit_in.get_with_eof();
+		if (bit == IBitIn::EOF_VALUE) return false;
+		++symbol_bsize;
 	} while (!bit);
-	assert(sizeof(symbol_type)*8 >= symbol_size);
+	assert(sizeof(symbol_type)*8 >= symbol_bsize);
 	
-	// decode unary encoded htree_idx_type_size-1
-	size_t htree_idx_type_size = 0;
+	// decode unary encoded htree_idx_type_bsize-1
+	size_t htree_idx_type_bsize = 0;
 	do {
-		bit = decoder.decode_bit();
-		if (bit == BIT_EOF_VALUE) return false;
-		++htree_idx_type_size;
+		bit = bit_in.get_with_eof();
+		if (bit == IBitIn::EOF_VALUE) return false;
+		++htree_idx_type_bsize;
 	} while (!bit);
-	assert(sizeof(htree_idx_type)*8 >= htree_idx_type_size);
+	assert(sizeof(htree_idx_type)*8 >= htree_idx_type_bsize);
 	
-	typename SymbolIO<symbol_type>::SymbolDecoder    symbol_decoder(decoder, symbol_size);
-	typename SymbolIO<htree_idx_type>::SymbolDecoder htree_idx_decoder(decoder, htree_idx_type_size);
+	BitSymbolIn<symbol_type> symbol_in(bit_in, symbol_bsize);
+	BitSymbolIn<htree_idx_type> htree_idx_in(bit_in, htree_idx_type_bsize);
 	
 	// decode dhtree
 	dhtree.root = 0;
-	if (!htree_idx_decoder.decode(dhtree.size)) return false;
+	if (!htree_idx_in.get(dhtree.size)) return false;
 	
 	for (htree_idx_type i=0; i<dhtree.size; ++i) {
 		DHTreeNode &dnode = dhtree.htree[i];
-		bit = decoder.decode_bit();
-		if (bit == BIT_EOF_VALUE) return false;
+		bit = bit_in.get_with_eof();
+		if (bit == IBitIn::EOF_VALUE) return false;
 		dnode.is_leaf = bit;
 		if (dnode.is_leaf) {
-			if (!symbol_decoder.decode(dnode.value.leaf_value)) return false;
+			if (!symbol_in.get(dnode.value.leaf_value)) return false;
 		} else {
-			if (!htree_idx_decoder.decode(dnode.value.childs[0])) return false;
-			if (!htree_idx_decoder.decode(dnode.value.childs[1])) return false;
+			if (!htree_idx_in.get(dnode.value.childs[0])) return false;
+			if (!htree_idx_in.get(dnode.value.childs[1])) return false;
 		}
 	}
 	
-	return decoder.decode_bit() == BIT_EOF_VALUE;
+	return bit_in.get_with_eof() == IBitIn::EOF_VALUE;
 }
 
 };
