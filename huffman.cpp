@@ -4,47 +4,44 @@
 #include <stdint.h>
 #include <string.h>
 #include <vector>
-#include "chario.h"
-#include "binary.h"
+#include "file_chario.h"
+#include "char_symbolio.h"
+#include "char_bitio.h"
 #include "huffman.h"
 
 typedef uint_fast8_t symbol_type;
 typedef uint_fast16_t htree_idx_type;
 #define MAX_SYMBOL_COUNT 256
-#define SYMBOL_SIZE 8
+#define SYMBOL_SIZE 1
+#define SYMBOL_BSIZE (SYMBOL_SIZE*8)
 
-typedef std::vector<symbol_type> vector_type;
 typedef Huffman<symbol_type, htree_idx_type, MAX_SYMBOL_COUNT> huffman_type;
 typedef typename huffman_type::DHTree dhtree_type;
-
-void fread_all(FILE *stream, vector_type &vector) {
-	while (true) {
-		int c = fgetc(stream);
-		if (c == EOF) break;
-		vector.push_back(c);
-	}
-}
 
 void encode(const char *dhtree_fname) {
 	FILE *dhtree_file = fopen(dhtree_fname, "w");
 	if (dhtree_file == NULL) {perror("fopen"); exit(EXIT_FAILURE);}
 
+	FileCharIn char_in(stdin);
+	CharSymbolIn<symbol_type, SYMBOL_SIZE> symbol_in(char_in);
 	std::vector<symbol_type> input_vector;
-	fread_all(stdin, input_vector);
+	symbol_type symbol;
+	while (symbol_in.get(symbol)) input_vector.push_back(symbol);
 	const symbol_type* input_data = input_vector.data();
 	size_t input_data_size = input_vector.size();
+	assert(input_data_size > 0);
 	
 	dhtree_type dhtree;
 	{
-		FileStreamCharPrinter char_printer(stdout);
-		BinaryEncoder encoder(char_printer);
-		huffman_type::encode(input_data, input_data_size, encoder, dhtree);
+		FileCharOut char_out(stdout);
+		CharBitOut bit_out(char_out);
+		huffman_type::encode(input_data, input_data_size, bit_out, dhtree);
 	}
 	{
 		//huffman_type::fprint_dhtable(stderr, dhtree);
-		FileStreamCharPrinter char_printer(dhtree_file);
-		BinaryEncoder encoder(char_printer);
-		huffman_type::dhtree_encode(dhtree, encoder, SYMBOL_SIZE);
+		FileCharOut char_out(dhtree_file);
+		CharBitOut bit_out(char_out);
+		huffman_type::dhtree_encode(dhtree, bit_out, SYMBOL_BSIZE);
 	}
 	
 	if (fclose(dhtree_file)) perror("fclose");
@@ -56,23 +53,19 @@ void decode(const char *dhtree_fname) {
 	
 	dhtree_type dhtree;
 	{
-		FileStreamCharReader char_reader(dhtree_file);
-		BinaryDecoder decoder(char_reader);
-		bool res = huffman_type::dhtree_decode(decoder, dhtree);
+		FileCharIn char_in(dhtree_file);
+		CharBitIn bit_in(char_in);
+		bool res = huffman_type::dhtree_decode(bit_in, dhtree);
 		assert(res);
 		//huffman_type::fprint_dhtable(stderr, dhtree);
 	}
 	if (fclose(dhtree_file)) perror("fclose");
-	static huffman_type::symbol_type text[1024*1024];
-	size_t text_size;
 	{
-		FileStreamCharReader char_reader(stdin);
-		BinaryDecoder decoder(char_reader);
-		text_size = huffman_type::decode(dhtree, decoder, text, sizeof(text)/sizeof(text[0]));
-	}
-	
-	for (size_t i=0; i<text_size; ++i) {
-		putchar(text[i]);
+		FileCharIn char_in(stdin);
+		CharBitIn bit_in(char_in);
+		FileCharOut char_out(stdout);
+		CharSymbolOut<symbol_type, SYMBOL_SIZE> symbol_out(char_out);
+		huffman_type::decode(dhtree, bit_in, symbol_out);
 	}
 }
 
