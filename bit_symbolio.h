@@ -15,7 +15,9 @@ private:
 	
 public:
 	// symbol_bsize - symbol size in bits
-	BitSymbolOut(IBitOut &b_bit_out, size_t b_symbol_bsize) : bit_out(b_bit_out), symbol_bsize(b_symbol_bsize) {}
+	BitSymbolOut(IBitOut &b_bit_out, size_t b_symbol_bsize) : bit_out(b_bit_out), symbol_bsize(b_symbol_bsize) {
+		assert(symbol_bsize <= sizeof(symbol_type) * 8);
+	}
 	
 	void put(symbol_type symbol) {
 		symbol_type mask = 1;
@@ -39,7 +41,9 @@ private:
 	size_t symbol_bsize;
 	
 public:
-	BitSymbolIn(IBitIn &b_bit_in, size_t b_symbol_bsize) : bit_in(b_bit_in), symbol_bsize(b_symbol_bsize) {}
+	BitSymbolIn(IBitIn &b_bit_in, size_t b_symbol_bsize) : bit_in(b_bit_in), symbol_bsize(b_symbol_bsize) {
+		assert(symbol_bsize <= sizeof(symbol_type) * 8);
+	}
 	
 	bool get(symbol_type &symbol) {
 		symbol_type result = 0;
