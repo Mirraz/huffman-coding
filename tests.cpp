@@ -10,6 +10,7 @@
 #include "base64_char_bitio.h"
 #include "bit_symbolio.h"
 #include "array_symbolio.h"
+#include "char_symbolio.h"
 #include "huffman.h"
 
 static const char test_char_str[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -244,6 +245,29 @@ void test_array_symbolio() {
 	assert(!array_symbol_in.get(symbol));
 }
 
+void test_char_symbolio() {
+	typedef uint32_t symbol_type;
+	symbol_type data[256];
+	const size_t data_size = sizeof(data) / sizeof(data[0]);
+	make_test_data<symbol_type>(data, data_size);
+	
+	char str[1024];
+	StringCharOut string_char_out(str, sizeof(str)/sizeof(str[0]));
+	CharSymbolOut<symbol_type> symbol_out(string_char_out);
+	for (size_t i=0; i<data_size; ++i) symbol_out.put(data[i]);
+	size_t str_length = string_char_out.get_length();
+	
+	StringCharIn string_char_in(str, str_length);
+	CharSymbolIn<symbol_type> symbol_in(string_char_in);
+	for (size_t i=0; i<data_size; ++i) {
+		symbol_type symbol;
+		assert(symbol_in.get(symbol));
+		assert(symbol == data[i]);
+	}
+	symbol_type symbol;
+	assert(!symbol_in.get(symbol));
+}
+
 void print_base64_string(const char base64_str[], size_t base64_str_length, size_t max_line_length) {
 	size_t i = 0;
 	while (i < base64_str_length) {
@@ -311,7 +335,8 @@ void tests_suite() {
 	//test_bit_symbolio();
 	//test_base64_char_bitio();
 	//test_array_symbolio();
-	test_huffman();
+	test_char_symbolio();
+	//test_huffman();
 }
 
 int main() {

@@ -46,7 +46,7 @@ public:
 		symbol_type result = 0;
 		for (size_t i=0; i<SYMBOL_SIZE*8; i+=8) {
 			int c = char_in.get_with_eof();
-			if (c == ICharFileIn::EOF_VALUE) return false;
+			if (c == ICharIn::EOF_VALUE) return false;
 			assert((c & ~0xFF) == 0);
 			result |= (c & 0xFF) << i;
 		}
