@@ -277,12 +277,39 @@ void print_base64_string(const char base64_str[], size_t base64_str_length, size
 	}
 }
 
-#define MAX_TEXT_SIZE 256
-void test_huffman_(size_t text_size, bool print_encoded) {
-	typedef uint_fast8_t symbol_type;
-	typedef Huffman<symbol_type, uint_fast16_t, 256> huffman_type;
-	typedef huffman_type::DHTree DHTree;
+typedef uint_fast8_t symbol_type;
+#define SYMBOL_BSIZE 8
+typedef Huffman<symbol_type, uint_fast16_t, ((uint_fast16_t)1)<<SYMBOL_BSIZE> huffman_type;
+typedef huffman_type::DHTree DHTree;
 
+void test_dhtreeio(const DHTree &dhtree) {
+	char str[512];
+	StringCharOut string_char_out(str, sizeof(str)/sizeof(str[0]));
+	CharBitOut bit_out(string_char_out);
+	huffman_type::dhtree_encode(dhtree, bit_out, SYMBOL_BSIZE);
+	size_t str_length = string_char_out.get_length();
+	
+	StringCharIn char_in(str, str_length);
+	CharBitIn bit_in(char_in);
+	DHTree d_dhtree;
+	bool res = huffman_type::dhtree_decode(bit_in, d_dhtree);
+	assert(res);
+	
+	assert(dhtree.root == d_dhtree.root);
+	assert(dhtree.size == d_dhtree.size);
+	for (huffman_type::htree_idx_type i=0; i<dhtree.size; ++i) {
+		assert(dhtree.htree[i].is_leaf == d_dhtree.htree[i].is_leaf);
+		if (dhtree.htree[i].is_leaf) {
+			assert(dhtree.htree[i].value.leaf_value == d_dhtree.htree[i].value.leaf_value);
+		} else {
+			assert(dhtree.htree[i].value.childs[0] == d_dhtree.htree[i].value.childs[0]);
+			assert(dhtree.htree[i].value.childs[1] == d_dhtree.htree[i].value.childs[1]);
+		}
+	}
+}
+
+#define MAX_TEXT_SIZE 256
+void test_huffman_(size_t text_size, bool print_encoded, bool check_dhtree) {
 	assert(text_size <= MAX_TEXT_SIZE);
 	char str[MAX_TEXT_SIZE*4/3+1];
 	StringCharOut string_char_out(str, sizeof(str)/sizeof(str[0]));
@@ -300,13 +327,15 @@ void test_huffman_(size_t text_size, bool print_encoded) {
 	
 	if (print_encoded) {
 		printf("dhtree =\n");
-		huffman_type::print_dhtable(dhtree);
+		huffman_type::print_dhtree(dhtree);
 		printf("\n");
 		printf("base64_str_length = %u\n", (unsigned int)str_length);
 		printf("base64_str =\n");
 		print_base64_string(str, str_length, 64);
 		printf("\n");
 	}
+	
+	if (check_dhtree) test_dhtreeio(dhtree);
 	
 	/////////
 	
@@ -325,8 +354,12 @@ void test_huffman_(size_t text_size, bool print_encoded) {
 }
 
 void test_huffman() {
-	//test_huffman_(256, true);
-	for (uint_fast16_t i=1; i<=256; ++i) test_huffman_(i, false);
+	//test_huffman_(256, true, false);
+	for (uint_fast16_t i=1; i<=256; ++i) test_huffman_(i, false, false);
+}
+
+void test_huffman_with_dhtree() {
+	for (uint_fast16_t i=1; i<=256; ++i) test_huffman_(i, false, true);
 }
 
 void tests_suite() {
@@ -337,6 +370,7 @@ void tests_suite() {
 	test_array_symbolio();
 	test_char_symbolio();
 	test_huffman();
+	test_huffman_with_dhtree();
 }
 
 int main() {

@@ -209,7 +209,7 @@ static void decode(const DHTree &dhtree, IBitIn &bit_in, ISymbolOut<SYMBOL_TYPE>
 	assert(idx == dhtree.root);
 }
 
-static void fprint_dhtable(FILE *stream, const DHTree &dhtree) {
+static void fprint_dhtree(FILE *stream, const DHTree &dhtree) {
 	typedef unsigned long long int lluint_type;
 	#define LLUINT_FMT "llu"
 	fprintf(stream, "{%" LLUINT_FMT ",%" LLUINT_FMT ",{\n", (lluint_type)dhtree.root, (lluint_type)dhtree.size);
@@ -227,8 +227,8 @@ static void fprint_dhtable(FILE *stream, const DHTree &dhtree) {
 	#undef LLUINT_FMT
 }
 
-static void print_dhtable(const DHTree &dhtree) {
-	fprint_dhtable(stdout, dhtree);
+static void print_dhtree(const DHTree &dhtree) {
+	fprint_dhtree(stdout, dhtree);
 }
 
 // symbol_bsize - size of symbol in bits
