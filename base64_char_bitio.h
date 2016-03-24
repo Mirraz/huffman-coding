@@ -2,32 +2,13 @@
 #define BASE64_CHAR_BITIO_H
 
 #include <stdint.h>
-#include "ibitio.h"
-#include "ichario.h"
+#include "abstract_char_bitio.h"
 
-class Base64CharBitOut : public IBitOut {
-private:
-	ICharOut &char_out;
-	uint_fast8_t remainder;
-	uint_fast8_t mask;
-	
-public:
-	Base64CharBitOut(ICharOut &b_char_out);
-	void put(bit_type bit);
-	void finish();
-};
+char base64_code_to_char(uint_fast8_t code);
+typedef AbstractCharBitOut<6, base64_code_to_char> Base64CharBitOut;
 
-class Base64CharBitIn : public IBitIn {
-private:
-	ICharIn &char_in;
-	uint_fast8_t remainder;
-	uint_fast8_t rem_counter;
-	int next_c;
-	
-public:
-	Base64CharBitIn(ICharIn &b_char_in);
-	bit_or_eof_type get_with_eof();
-};
+uint_fast8_t base64_char_to_code(char c);
+typedef AbstractCharBitIn<6, base64_char_to_code> Base64CharBitIn;
 
 #endif/*BASE64_CHAR_BITIO_H*/
 

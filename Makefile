@@ -22,7 +22,7 @@ tests: $(BUILD_DIR)/tests.o $(BUILD_DIR)/ibitio.o $(BUILD_DIR)/ichario.o $(BUILD
 	$(LD) -o $@ $^ $(LDFLAGS)
 	$(STRIP) $@
 
-$(BUILD_DIR)/tests.o: $(SRC_DIR)/tests.cpp $(SRC_DIR)/ibitio.h $(SRC_DIR)/ichario.h $(SRC_DIR)/isymbolio.h $(SRC_DIR)/file_chario.h $(SRC_DIR)/line_file_chario.h $(SRC_DIR)/string_chario.h $(SRC_DIR)/char_bitio.h $(SRC_DIR)/base64_char_bitio.h $(SRC_DIR)/bit_symbolio.h $(SRC_DIR)/array_symbolio.h $(SRC_DIR)/char_symbolio.h $(SRC_DIR)/huffman.h Makefile
+$(BUILD_DIR)/tests.o: $(SRC_DIR)/tests.cpp $(SRC_DIR)/ibitio.h $(SRC_DIR)/ichario.h $(SRC_DIR)/isymbolio.h $(SRC_DIR)/file_chario.h $(SRC_DIR)/line_file_chario.h $(SRC_DIR)/string_chario.h $(SRC_DIR)/abstract_char_bitio.h $(SRC_DIR)/char_bitio.h $(SRC_DIR)/base64_char_bitio.h $(SRC_DIR)/bit_symbolio.h $(SRC_DIR)/array_symbolio.h $(SRC_DIR)/char_symbolio.h $(SRC_DIR)/huffman.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
 $(BUILD_DIR)/ibitio.o: $(SRC_DIR)/ibitio.cpp $(SRC_DIR)/ibitio.h Makefile
@@ -40,10 +40,10 @@ $(BUILD_DIR)/line_file_chario.o: $(SRC_DIR)/line_file_chario.cpp $(SRC_DIR)/line
 $(BUILD_DIR)/string_chario.o: $(SRC_DIR)/string_chario.cpp $(SRC_DIR)/string_chario.h $(SRC_DIR)/ichario.h $(SRC_DIR)/isymbolio.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
-$(BUILD_DIR)/char_bitio.o: $(SRC_DIR)/char_bitio.cpp $(SRC_DIR)/char_bitio.h $(SRC_DIR)/ibitio.h $(SRC_DIR)/ichario.h $(SRC_DIR)/isymbolio.h Makefile
+$(BUILD_DIR)/char_bitio.o: $(SRC_DIR)/char_bitio.cpp $(SRC_DIR)/char_bitio.h $(SRC_DIR)/abstract_char_bitio.h $(SRC_DIR)/ibitio.h $(SRC_DIR)/ichario.h $(SRC_DIR)/isymbolio.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
-$(BUILD_DIR)/base64_char_bitio.o: $(SRC_DIR)/base64_char_bitio.cpp $(SRC_DIR)/base64_char_bitio.h $(SRC_DIR)/ibitio.h $(SRC_DIR)/ichario.h $(SRC_DIR)/isymbolio.h Makefile
+$(BUILD_DIR)/base64_char_bitio.o: $(SRC_DIR)/base64_char_bitio.cpp $(SRC_DIR)/base64_char_bitio.h $(SRC_DIR)/abstract_char_bitio.h $(SRC_DIR)/ibitio.h $(SRC_DIR)/ichario.h $(SRC_DIR)/isymbolio.h Makefile
 	$(CC) -o $@ $< -c $(CFLAGS)
 
 
