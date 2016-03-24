@@ -330,13 +330,13 @@ void test_huffman() {
 }
 
 void tests_suite() {
-	//test_string_chario();
+	test_string_chario();
 	test_char_bitio();
 	test_base64_char_bitio();
-	//test_bit_symbolio();
-	//test_array_symbolio();
-	//test_char_symbolio();
-	//test_huffman();
+	test_bit_symbolio();
+	test_array_symbolio();
+	test_char_symbolio();
+	test_huffman();
 }
 
 int main() {

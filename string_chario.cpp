@@ -24,6 +24,6 @@ bool StringCharIn::get(char &c) {
 int StringCharIn::get_with_eof() {
 	char c;
 	if (!get(c)) return ICharIn::EOF_VALUE;
-	return c;
+	return (unsigned char)c;
 }
 
