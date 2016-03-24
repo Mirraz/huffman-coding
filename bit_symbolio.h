@@ -6,6 +6,7 @@
 
 template <typename SYMBOL_TYPE>
 class BitSymbolOut : public ISymbolOut<SYMBOL_TYPE> {
+static_assert((SYMBOL_TYPE)-1 > 0, "SYMBOL_TYPE must be unsigned");
 public:
 	typedef SYMBOL_TYPE symbol_type;
 	
@@ -33,6 +34,7 @@ public:
 
 template <typename SYMBOL_TYPE>
 class BitSymbolIn : public ISymbolIn<SYMBOL_TYPE> {
+static_assert((SYMBOL_TYPE)-1 > 0, "SYMBOL_TYPE must be unsigned");
 public:
 	typedef SYMBOL_TYPE symbol_type;
 

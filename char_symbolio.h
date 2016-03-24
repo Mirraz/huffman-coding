@@ -9,6 +9,7 @@
 // SYMBOL_SIZE - in bytes
 template <typename SYMBOL_TYPE, size_t SYMBOL_SIZE>
 class CharSymbolOut : public ISymbolOut<SYMBOL_TYPE>  {
+static_assert((SYMBOL_TYPE)-1 > 0, "SYMBOL_TYPE must be unsigned");
 static_assert((SYMBOL_SIZE << 3) >> 3 == SYMBOL_SIZE, "SYMBOL_SIZE overflow");
 public:
 	typedef SYMBOL_TYPE symbol_type;
@@ -34,6 +35,7 @@ public:
 // SYMBOL_SIZE - in bytes
 template <typename SYMBOL_TYPE, size_t SYMBOL_SIZE>
 class CharSymbolIn : public ISymbolIn<SYMBOL_TYPE> {
+static_assert((SYMBOL_TYPE)-1 > 0, "SYMBOL_TYPE must be unsigned");
 static_assert((SYMBOL_SIZE << 3) >> 3 == SYMBOL_SIZE, "SYMBOL_SIZE overflow");
 public:
 	typedef SYMBOL_TYPE symbol_type;
