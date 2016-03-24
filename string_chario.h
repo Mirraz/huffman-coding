@@ -3,12 +3,11 @@
 
 #include <stddef.h>
 #include "ichario.h"
+#include "array_symbolio.h"
 
-class StringCharOut : public ICharOut {
+class StringCharOut : public ICharOut, public ArraySymbolOut<char> {
 private:
-	char *str;
-	size_t size;
-	size_t idx;
+	typedef ArraySymbolOut<char> array_symbol_out_type;
 public:
 	StringCharOut(char *b_str, size_t b_size);
 	void put(char c);
@@ -16,14 +15,12 @@ public:
 	size_t get_length() const;
 };
 
-class StringCharIn : public ICharIn {
+class StringCharIn : public ICharIn, public ArraySymbolIn<char> {
 private:
-	const char *str;
-	size_t size;
-	size_t idx;
-	
+	typedef ArraySymbolIn<char> array_symbol_in_type;
 public:
 	StringCharIn(const char *b_str, size_t b_size);
+	bool get(char &c);
 	int get_with_eof();
 };
 

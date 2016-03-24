@@ -17,15 +17,17 @@ private:
 public:
 	ArraySymbolOut(symbol_type *b_array, size_t b_size) : array(b_array), size(b_size), idx(0) {}
 	
-	void put(symbol_type symbol) {
+	virtual ~ArraySymbolOut() {}
+	
+	virtual void put(symbol_type symbol) {
 		assert(idx < size);
 		array[idx++] = symbol;
 	}
 	
-	void finish(){
+	virtual void finish(){
 	}
 	
-	size_t get_length() const {
+	virtual size_t get_length() const {
 		return idx;
 	}
 };
@@ -43,7 +45,9 @@ private:
 public:
 	ArraySymbolIn(const symbol_type *b_array, size_t b_size) : array(b_array), size(b_size), idx(0) {}
 	
-	bool get(symbol_type &symbol) {
+	virtual ~ArraySymbolIn() {}
+	
+	virtual bool get(symbol_type &symbol) {
 		if (idx == size) return false;
 		symbol = array[idx++];
 		return true;
