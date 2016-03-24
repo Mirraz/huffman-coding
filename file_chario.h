@@ -1,5 +1,5 @@
-#ifndef FILECHARIO_H
-#define FILECHARIO_H
+#ifndef FILE_CHARIO_H
+#define FILE_CHARIO_H
 
 #include <stdio.h>
 #include "ichario.h"
@@ -24,5 +24,5 @@ public:
 	int get_with_eof();
 };
 
-#endif/*FILECHARIO_H*/
+#endif/*FILE_CHARIO_H*/
 

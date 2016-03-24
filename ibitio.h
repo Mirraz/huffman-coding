@@ -23,5 +23,5 @@ public:
 	virtual bit_or_eof_type get_with_eof() = 0;
 };
 
-#endif /*IBITIO_H*/
+#endif/*IBITIO_H*/
 
