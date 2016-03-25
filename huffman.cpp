@@ -29,7 +29,6 @@ void encode(const char *dhtree_fname) {
 	while (symbol_in.get(symbol)) input_vector.push_back(symbol);
 	const symbol_type* input_data = input_vector.data();
 	size_t input_data_size = input_vector.size();
-	assert(input_data_size > 0);
 	
 	dhtree_type dhtree;
 	{
@@ -38,7 +37,7 @@ void encode(const char *dhtree_fname) {
 		huffman_type::encode(input_data, input_data_size, bit_out, dhtree);
 	}
 	{
-		//huffman_type::fprint_dhtable(stderr, dhtree);
+		//huffman_type::fprint_dhtree(stderr, dhtree);
 		FileCharOut char_out(dhtree_file);
 		SymbolBitOut<unsigned char, 8> bit_out(char_out);
 		huffman_type::dhtree_encode(dhtree, bit_out, SYMBOL_BSIZE);
@@ -57,7 +56,7 @@ void decode(const char *dhtree_fname) {
 		SymbolBitIn<unsigned char, 8> bit_in(char_in);
 		bool res = huffman_type::dhtree_decode(bit_in, dhtree);
 		assert(res);
-		//huffman_type::fprint_dhtable(stderr, dhtree);
+		//huffman_type::fprint_dhtree(stderr, dhtree);
 	}
 	if (fclose(dhtree_file)) perror("fclose");
 	{

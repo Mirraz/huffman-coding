@@ -74,6 +74,12 @@ typedef std::map<symbol_type, hcode> code_map_type;
 
 static void make_huffman_codes(const symbol_type array[], size_t array_size, code_map_type &code_map, DHTree &dhtree) {
 	assert(code_map.empty());
+	
+	if (array_size == 0) {
+		dhtree.root = 0;
+		dhtree.size = 0;
+		return;
+	}
 
 	typedef std::map<symbol_type, weight_type> frequency_map_type;
 	typedef typename frequency_map_type::iterator frequency_map_iterator_type;
@@ -233,6 +239,11 @@ static void print_dhtree(const DHTree &dhtree) {
 
 // symbol_bsize - size of symbol in bits
 static void dhtree_encode(const DHTree &dhtree, IBitOut &bit_out, size_t symbol_bsize) {
+	if (dhtree.size == 0) {
+		bit_out.finish();
+		return;
+	}
+
 	// find size in bits of dhtree.size
 	assert(dhtree.size > 0);
 	size_t htree_idx_type_bsize = 0;
@@ -271,12 +282,17 @@ static void dhtree_encode(const DHTree &dhtree, IBitOut &bit_out, size_t symbol_
 
 // returns success
 static bool dhtree_decode(IBitIn &bit_in, DHTree &dhtree) {
-	IBitIn::bit_or_eof_type bit;
+	IBitIn::bit_or_eof_type bit = bit_in.get_with_eof();
+	if (bit == IBitIn::EOF_VALUE) {
+		dhtree.root = 0;
+		dhtree.size = 0;
+		return true;
+	}
 	
 	// decode unary encoded symbol_bsize-1
 	size_t symbol_bsize = 0;
 	do {
-		bit = bit_in.get_with_eof();
+		if (symbol_bsize != 0) bit = bit_in.get_with_eof(); // first bit is read already
 		if (bit == IBitIn::EOF_VALUE) return false;
 		++symbol_bsize;
 	} while (!bit);
