@@ -19,7 +19,7 @@ constexpr size_t test_char_str_size = sizeof(test_char_str)/sizeof(test_char_str
 
 void test_char_out(ICharOut &char_out) {
 	for (size_t i=0; i<test_char_str_size; ++i) {
-		char c = test_char_str[i];
+		unsigned char c = test_char_str[i];
 		char_out.put(c);
 	}
 	char_out.finish();
@@ -73,7 +73,7 @@ void test_array_symbolio() {
 }
 
 void test_string_chario() {
-	char str[1024];
+	unsigned char str[1024];
 	StringCharOut string_char_out(str, sizeof(str)/sizeof(str[0]));
 	test_char_out(string_char_out);
 	size_t str_length = string_char_out.get_length();
@@ -97,7 +97,7 @@ void test_char_symbolio() {
 	const size_t data_size = sizeof(data) / sizeof(data[0]);
 	make_test_data<symbol_type, 32>(data, data_size);
 	
-	char str[1024];
+	unsigned char str[1024];
 	StringCharOut string_char_out(str, sizeof(str)/sizeof(str[0]));
 	CharSymbolOut<symbol_type, 4> symbol_out(string_char_out);
 	for (size_t i=0; i<data_size; ++i) symbol_out.put(data[i]);
@@ -124,16 +124,14 @@ void test_symbol_bit_out_stdout() {
 	make_test_bits(bits, bit_count);
 	
 	FileCharOut file_char_out(stdout);
-	CharSymbolOut<uint_fast8_t, 1> char_symbol_out(file_char_out);
-	SymbolBitOut<uint_fast8_t, 8> symbol_bit_out(char_symbol_out);
+	SymbolBitOut<unsigned char, 8> symbol_bit_out(file_char_out);
 	symbol_bit_out.put_array(bits, bit_count);
 	symbol_bit_out.finish();
 }
 
 void test_symbol_bit_in_stdin() {
 	FileCharIn file_char_in(stdin);
-	CharSymbolIn<uint_fast8_t, 1> char_symbol_in(file_char_in);
-	SymbolBitIn<uint_fast8_t, 8> symbol_bit_in(char_symbol_in);
+	SymbolBitIn<unsigned char, 8> symbol_bit_in(file_char_in);
 	while (true) {
 		IBitIn::bit_or_eof_type bit = symbol_bit_in.get_with_eof();
 		if (bit == IBitIn::EOF_VALUE) break;
@@ -173,16 +171,14 @@ void test_base64_char_out_stdout() {
 	make_test_bits(bits, bit_count);
 
 	FileCharOut file_char_out(stdout);
-	CharSymbolOut<unsigned char, 1> char_symbol_out(file_char_out);
-	Base64CharBitOut bit_out(char_symbol_out);
+	Base64CharBitOut bit_out(file_char_out);
 	bit_out.put_array(bits, bit_count);
 	bit_out.finish();
 }
 
 void test_base64_char_bit_in_stdin() {
 	FileCharIn file_char_in(stdin);
-	CharSymbolIn<unsigned char, 1> char_symbol_in(file_char_in);
-	Base64CharBitIn bit_in(char_symbol_in);
+	Base64CharBitIn bit_in(file_char_in);
 	while (true) {
 		IBitIn::bit_or_eof_type bit = bit_in.get_with_eof();
 		if (bit == IBitIn::EOF_VALUE) break;
@@ -218,8 +214,7 @@ void test_base64_char_bitio() {
 
 void test_vbit_symbol_out_stdout() {
 	FileCharOut file_char_out(stdout);
-	CharSymbolOut<uint_fast8_t, 1> file_symbol_out(file_char_out);
-	SymbolBitOut<uint_fast8_t, 8> bit_out(file_symbol_out);
+	SymbolBitOut<unsigned char, 8> bit_out(file_char_out);
 	
 	typedef uint32_t symbol_type;
 	VBitSymbolOut<symbol_type> symbol_out(bit_out, sizeof(symbol_type)*8);
@@ -231,8 +226,7 @@ void test_vbit_symbol_out_stdout() {
 
 void test_vbit_symbol_in_stdin() {
 	FileCharIn file_char_in(stdin);
-	CharSymbolIn<uint_fast8_t, 1> file_symbol_in(file_char_in);
-	SymbolBitIn<uint_fast8_t, 8> bit_in(file_symbol_in);
+	SymbolBitIn<unsigned char, 8> bit_in(file_char_in);
 	
 	typedef uint32_t symbol_type;
 	VBitSymbolIn<symbol_type> symbol_in(bit_in, sizeof(symbol_type)*8);
@@ -300,7 +294,7 @@ void test_bit_symbolio() {
 	assert(!bit_symbol_in.get(symbol));
 }
 
-void print_base64_string(const char base64_str[], size_t base64_str_length, size_t max_line_length) {
+void print_base64_string(const unsigned char base64_str[], size_t base64_str_length, size_t max_line_length) {
 	size_t i = 0;
 	while (i < base64_str_length) {
 		putchar(base64_str[i]);
@@ -363,7 +357,7 @@ void test_huffman_(size_t text_size, bool print_encoded, bool check_dhtree) {
 		printf("\n");
 		printf("base64_str_length = %u\n", (unsigned int)storage_length);
 		printf("base64_str =\n");
-		print_base64_string((char *)storage, storage_length, 64);
+		print_base64_string(storage, storage_length, 64);
 		printf("\n");
 	}
 	

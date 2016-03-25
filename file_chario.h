@@ -11,7 +11,7 @@ private:
 public:
 	FileCharOut(FILE *b_stream);
 	virtual ~FileCharOut();
-	virtual void put(char c);
+	virtual void put(unsigned char c);
 	virtual void finish();
 };
 

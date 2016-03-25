@@ -5,22 +5,22 @@
 #include "ichario.h"
 #include "array_symbolio.h"
 
-class StringCharOut : public ICharOut, public ArraySymbolOut<char> {
+class StringCharOut : public ICharOut, public ArraySymbolOut<unsigned char> {
 private:
-	typedef ArraySymbolOut<char> array_symbol_out_type;
+	typedef ArraySymbolOut<unsigned char> array_symbol_out_type;
 public:
-	StringCharOut(char *b_str, size_t b_size);
-	void put(char c);
+	StringCharOut(unsigned char *b_str, size_t b_size);
+	void put(unsigned char c);
 	void finish();
 	size_t get_length() const;
 };
 
-class StringCharIn : public ICharIn, public ArraySymbolIn<char> {
+class StringCharIn : public ICharIn, public ArraySymbolIn<unsigned char> {
 private:
-	typedef ArraySymbolIn<char> array_symbol_in_type;
+	typedef ArraySymbolIn<unsigned char> array_symbol_in_type;
 public:
-	StringCharIn(const char *b_str, size_t b_size);
-	bool get(char &c);
+	StringCharIn(const unsigned char *b_str, size_t b_size);
+	bool get(unsigned char &c);
 	int get_with_eof();
 };
 

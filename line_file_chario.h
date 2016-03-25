@@ -11,7 +11,7 @@ private:
 public:
 	LineFileCharOut(FILE *b_stream);
 	LineFileCharOut(FILE *b_stream, size_t b_line_length);
-	void put(char c);
+	void put(unsigned char c);
 	void finish();
 };
 

@@ -6,7 +6,7 @@ FileCharOut::FileCharOut(FILE *b_stream) : stream(b_stream) {}
 
 FileCharOut::~FileCharOut() {}
 
-void FileCharOut::put(char c) {
+void FileCharOut::put(unsigned char c) {
 	fputc(c, stream);
 }
 

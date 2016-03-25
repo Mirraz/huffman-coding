@@ -34,15 +34,13 @@ void encode(const char *dhtree_fname) {
 	dhtree_type dhtree;
 	{
 		FileCharOut char_out(stdout);
-		CharSymbolOut<unsigned char, 1> symbol_out(char_out);
-		SymbolBitOut<unsigned char, 8> bit_out(symbol_out);
+		SymbolBitOut<unsigned char, 8> bit_out(char_out);
 		huffman_type::encode(input_data, input_data_size, bit_out, dhtree);
 	}
 	{
 		//huffman_type::fprint_dhtable(stderr, dhtree);
 		FileCharOut char_out(dhtree_file);
-		CharSymbolOut<unsigned char, 1> symbol_out(char_out);
-		SymbolBitOut<unsigned char, 8> bit_out(symbol_out);
+		SymbolBitOut<unsigned char, 8> bit_out(char_out);
 		huffman_type::dhtree_encode(dhtree, bit_out, SYMBOL_BSIZE);
 	}
 	
@@ -56,8 +54,7 @@ void decode(const char *dhtree_fname) {
 	dhtree_type dhtree;
 	{
 		FileCharIn char_in(dhtree_file);
-		CharSymbolIn<unsigned char, 1> symbol_in(char_in);
-		SymbolBitIn<unsigned char, 8> bit_in(symbol_in);
+		SymbolBitIn<unsigned char, 8> bit_in(char_in);
 		bool res = huffman_type::dhtree_decode(bit_in, dhtree);
 		assert(res);
 		//huffman_type::fprint_dhtable(stderr, dhtree);
@@ -65,8 +62,7 @@ void decode(const char *dhtree_fname) {
 	if (fclose(dhtree_file)) perror("fclose");
 	{
 		FileCharIn char_in(stdin);
-		CharSymbolIn<unsigned char, 1> symbol_in(char_in);
-		SymbolBitIn<unsigned char, 8> bit_in(symbol_in);
+		SymbolBitIn<unsigned char, 8> bit_in(char_in);
 		
 		FileCharOut char_out(stdout);
 		CharSymbolOut<symbol_type, SYMBOL_SIZE> symbol_out(char_out);
