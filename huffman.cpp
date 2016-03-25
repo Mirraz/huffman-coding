@@ -6,7 +6,7 @@
 #include <vector>
 #include "file_chario.h"
 #include "char_symbolio.h"
-#include "char_bitio.h"
+#include "symbol_bitio.h"
 #include "huffman.h"
 
 typedef uint_fast8_t symbol_type;
@@ -34,13 +34,15 @@ void encode(const char *dhtree_fname) {
 	dhtree_type dhtree;
 	{
 		FileCharOut char_out(stdout);
-		CharBitOut bit_out(char_out);
+		CharSymbolOut<unsigned char, 1> symbol_out(char_out);
+		SymbolBitOut<unsigned char, 8> bit_out(symbol_out);
 		huffman_type::encode(input_data, input_data_size, bit_out, dhtree);
 	}
 	{
 		//huffman_type::fprint_dhtable(stderr, dhtree);
 		FileCharOut char_out(dhtree_file);
-		CharBitOut bit_out(char_out);
+		CharSymbolOut<unsigned char, 1> symbol_out(char_out);
+		SymbolBitOut<unsigned char, 8> bit_out(symbol_out);
 		huffman_type::dhtree_encode(dhtree, bit_out, SYMBOL_BSIZE);
 	}
 	
@@ -54,7 +56,8 @@ void decode(const char *dhtree_fname) {
 	dhtree_type dhtree;
 	{
 		FileCharIn char_in(dhtree_file);
-		CharBitIn bit_in(char_in);
+		CharSymbolIn<unsigned char, 1> symbol_in(char_in);
+		SymbolBitIn<unsigned char, 8> bit_in(symbol_in);
 		bool res = huffman_type::dhtree_decode(bit_in, dhtree);
 		assert(res);
 		//huffman_type::fprint_dhtable(stderr, dhtree);
@@ -62,7 +65,9 @@ void decode(const char *dhtree_fname) {
 	if (fclose(dhtree_file)) perror("fclose");
 	{
 		FileCharIn char_in(stdin);
-		CharBitIn bit_in(char_in);
+		CharSymbolIn<unsigned char, 1> symbol_in(char_in);
+		SymbolBitIn<unsigned char, 8> bit_in(symbol_in);
+		
 		FileCharOut char_out(stdout);
 		CharSymbolOut<symbol_type, SYMBOL_SIZE> symbol_out(char_out);
 		huffman_type::decode(dhtree, bit_in, symbol_out);

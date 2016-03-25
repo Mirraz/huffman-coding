@@ -2,13 +2,23 @@
 #define BASE64_CHAR_BITIO_H
 
 #include <stdint.h>
-#include "abstract_char_bitio.h"
+#include "symbol_bitio.h"
 
-char base64_code_to_char(uint_fast8_t code);
-typedef AbstractCharBitOut<6, base64_code_to_char> Base64CharBitOut;
+class Base64CharBitOut : public SymbolBitOut<unsigned char, 6> {
+public:
+	Base64CharBitOut(ISymbolOut<unsigned char> &b_symbol_out);
+	
+protected:
+	unsigned char code_to_symbol(unsigned char code);
+};
 
-uint_fast8_t base64_char_to_code(char c);
-typedef AbstractCharBitIn<6, base64_char_to_code> Base64CharBitIn;
+class Base64CharBitIn : public SymbolBitIn<unsigned char, 6> {
+public:
+	Base64CharBitIn(ISymbolIn<unsigned char> &b_symbol_in);
+	
+protected:
+	unsigned char symbol_to_code(unsigned char symbol);
+};
 
 #endif/*BASE64_CHAR_BITIO_H*/
 

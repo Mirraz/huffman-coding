@@ -7,7 +7,7 @@
 #include <queue>
 #include <vector>
 #include "ibitio.h"
-#include "bit_symbolio.h"
+#include "vbit_symbolio.h"
 
 template <typename SYMBOL_TYPE, typename HTREE_IDX_TYPE, HTREE_IDX_TYPE MAX_SYMBOL_COUNT>
 class Huffman {
@@ -238,8 +238,8 @@ static void dhtree_encode(const DHTree &dhtree, IBitOut &bit_out, size_t symbol_
 	size_t htree_idx_type_bsize = 0;
 	for (htree_idx_type tsize = dhtree.size; tsize > 0; tsize >>= 1) ++htree_idx_type_bsize;
 	
-	BitSymbolOut<symbol_type> symbol_out(bit_out, symbol_bsize);
-	BitSymbolOut<htree_idx_type> htree_idx_out(bit_out, htree_idx_type_bsize);
+	VBitSymbolOut<symbol_type> symbol_out(bit_out, symbol_bsize);
+	VBitSymbolOut<htree_idx_type> htree_idx_out(bit_out, htree_idx_type_bsize);
 
 	// encode symbol_bsize-1 by unary coding
 	assert(symbol_bsize > 0);
@@ -291,8 +291,8 @@ static bool dhtree_decode(IBitIn &bit_in, DHTree &dhtree) {
 	} while (!bit);
 	assert(sizeof(htree_idx_type)*8 >= htree_idx_type_bsize);
 	
-	BitSymbolIn<symbol_type> symbol_in(bit_in, symbol_bsize);
-	BitSymbolIn<htree_idx_type> htree_idx_in(bit_in, htree_idx_type_bsize);
+	VBitSymbolIn<symbol_type> symbol_in(bit_in, symbol_bsize);
+	VBitSymbolIn<htree_idx_type> htree_idx_in(bit_in, htree_idx_type_bsize);
 	
 	// decode dhtree
 	dhtree.root = 0;
