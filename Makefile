@@ -18,6 +18,8 @@ LDFLAGS=$(WARNINGS) $(DEBUG) $(LDOPTIM) $(LIBFILES)
 SRC_DIR=.
 BUILD_DIR=build
 
+all: huffman
+
 tests: $(BUILD_DIR)/tests.o $(BUILD_DIR)/ibitio.o $(BUILD_DIR)/ichario.o $(BUILD_DIR)/file_chario.o $(BUILD_DIR)/line_file_chario.o $(BUILD_DIR)/string_chario.o $(BUILD_DIR)/base64_char_bitio.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 	$(STRIP) $@
