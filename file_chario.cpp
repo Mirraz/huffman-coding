@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdexcept>
 #include "file_chario.h"
 
 FileCharOut::FileCharOut(FILE *b_stream) : stream(b_stream) {}
@@ -7,7 +8,7 @@ FileCharOut::FileCharOut(FILE *b_stream) : stream(b_stream) {}
 FileCharOut::~FileCharOut() {}
 
 void FileCharOut::put(unsigned char c) {
-	fputc(c, stream);
+	if (fputc(c, stream) != c) throw std::runtime_error("fputc error");
 }
 
 void FileCharOut::finish() {

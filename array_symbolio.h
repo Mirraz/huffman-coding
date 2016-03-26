@@ -1,8 +1,8 @@
 #ifndef ARRAY_SYMBOLIO_H
 #define ARRAY_SYMBOLIO_H
 
-#include <assert.h>
 #include <stddef.h>
+#include <stdexcept>
 #include "isymbolio.h"
 
 template <typename SYMBOL_TYPE>
@@ -21,7 +21,7 @@ public:
 	virtual ~ArraySymbolOut() {}
 	
 	virtual void put(symbol_type symbol) {
-		assert(idx < size);
+		if (!(idx < size)) throw std::out_of_range("Array is full");
 		array[idx++] = symbol;
 	}
 	

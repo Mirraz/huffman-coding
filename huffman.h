@@ -6,6 +6,7 @@
 #include <map>
 #include <queue>
 #include <vector>
+#include <stdexcept>
 #include "ibitio.h"
 #include "vbit_symbolio.h"
 
@@ -87,6 +88,7 @@ static void make_huffman_codes(const symbol_type array[], size_t array_size, cod
 	for (size_t i=0; i<array_size; ++i) {
 		++frequency[array[i]];
 	}
+	if (frequency.size() > MAX_SYMBOL_COUNT) throw std::out_of_range("Symbols count exceeds MAX_SYMBOL_COUNT");
 	
 	struct HTreeNode htree[MAX_HTREE_SIZE];
 	typedef std::priority_queue<htree_idx_type, std::vector<htree_idx_type>, HTreeIdxComparator> heap_type;
@@ -245,7 +247,7 @@ static void dhtree_encode(const DHTree &dhtree, IBitOut &bit_out, size_t symbol_
 	}
 
 	// find size in bits of dhtree.size
-	assert(dhtree.size > 0);
+	if (!(dhtree.size > 0)) throw std::invalid_argument("Invalid dhtree: size can't be zero");
 	size_t htree_idx_type_bsize = 0;
 	for (htree_idx_type tsize = dhtree.size; tsize > 0; tsize >>= 1) ++htree_idx_type_bsize;
 	
@@ -253,7 +255,7 @@ static void dhtree_encode(const DHTree &dhtree, IBitOut &bit_out, size_t symbol_
 	VBitSymbolOut<htree_idx_type> htree_idx_out(bit_out, htree_idx_type_bsize);
 
 	// encode symbol_bsize-1 by unary coding
-	assert(symbol_bsize > 0);
+	if (!(symbol_bsize > 0)) throw std::invalid_argument("symbol_bsize can't be zero");
 	for (size_t i=1; i<symbol_bsize; ++i) bit_out.put(0);
 	bit_out.put(1);
 	
@@ -263,7 +265,7 @@ static void dhtree_encode(const DHTree &dhtree, IBitOut &bit_out, size_t symbol_
 	bit_out.put(1);
 	
 	// encode dhtree
-	assert(dhtree.root == 0);
+	if (!(dhtree.root == 0)) throw std::invalid_argument("Invalid dhtree: root must be zero");
 	htree_idx_out.put(dhtree.size);
 	
 	for (htree_idx_type i=0; i<dhtree.size; ++i) {

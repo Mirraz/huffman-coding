@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdint.h>
+#include <stdexcept>
 #include "base64_char_bitio.h"
 
 Base64CharBitOut::Base64CharBitOut(ISymbolOut<unsigned char> &b_symbol_out) :
@@ -22,7 +23,6 @@ unsigned char Base64CharBitIn::symbol_to_code(unsigned char symbol) {
 	if (c >= '0' && c <= '9') return c - '0' + 26*2;
 	if (c == '+') return 62;
 	if (c == '/') return 63;
-	assert(0);
-	return 64;
+	throw std::runtime_error("Not a base64 symbol");
 }
 

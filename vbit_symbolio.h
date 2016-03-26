@@ -1,7 +1,7 @@
 #ifndef VBIT_SYMBOLIO_H
 #define VBIT_SYMBOLIO_H
 
-#include <assert.h>
+#include <stdexcept>
 #include "isymbolio.h"
 #include "ibitio.h"
 
@@ -19,7 +19,8 @@ private:
 public:
 	// symbol_bsize - symbol size in bits
 	VBitSymbolOut(IBitOut &b_bit_out, size_t b_symbol_bsize) : bit_out(b_bit_out), symbol_bsize(b_symbol_bsize) {
-		assert(symbol_bsize <= sizeof(symbol_type) * 8);
+		if (!(symbol_bsize <= sizeof(symbol_type) * 8))
+			throw std::invalid_argument("symbol_bsize bits don't fit in SYMBOL_TYPE");
 	}
 	
 	void put(symbol_type symbol) {
@@ -48,7 +49,8 @@ private:
 public:
 	// symbol_bsize - symbol size in bits
 	VBitSymbolIn(IBitIn &b_bit_in, size_t b_symbol_bsize) : bit_in(b_bit_in), symbol_bsize(b_symbol_bsize) {
-		assert(symbol_bsize <= sizeof(symbol_type) * 8);
+		if (!(symbol_bsize <= sizeof(symbol_type) * 8))
+			throw std::invalid_argument("symbol_bsize bits don't fit in SYMBOL_TYPE");
 	}
 	
 	bool get(symbol_type &symbol) {
