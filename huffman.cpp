@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>		// getopt
 #include <vector>
 #include "file_chario.h"
 #include "char_symbolio.h"
@@ -18,7 +19,7 @@ typedef uint_fast16_t htree_idx_type;
 typedef Huffman<symbol_type, htree_idx_type, MAX_SYMBOL_COUNT> huffman_type;
 typedef typename huffman_type::DHTree dhtree_type;
 
-void encode(const char *dhtree_fname) {
+void encode(bool is_base64, const char *dhtree_fname, bool is_dhtree_base64) {
 	FILE *dhtree_file = fopen(dhtree_fname, "w");
 	if (dhtree_file == NULL) {perror("fopen"); exit(EXIT_FAILURE);}
 
@@ -46,7 +47,7 @@ void encode(const char *dhtree_fname) {
 	if (fclose(dhtree_file)) perror("fclose");
 }
 
-void decode(const char *dhtree_fname) {
+void decode(bool is_base64, const char *dhtree_fname, bool is_dhtree_base64) {
 	FILE *dhtree_file = fopen(dhtree_fname, "r");
 	if (dhtree_file == NULL) {perror("fopen"); exit(EXIT_FAILURE);}
 	
@@ -69,19 +70,69 @@ void decode(const char *dhtree_fname) {
 	}
 }
 
-int main(int argc, char* argv[]) {
-	if (argc != 3) {
-		fprintf(stderr, "error: not exactly 2 args\n");
-		exit(EXIT_FAILURE);
-	}
-	const char *dhtree_fname = argv[2];
-	if (!strcmp(argv[1], "-e")) {
-		encode(dhtree_fname);
-	} else if (!strcmp(argv[1], "-d")) {
-		decode(dhtree_fname);
-	} else {
-		fprintf(stderr, "error: first arg != [-e|-d]\n");
-		exit(EXIT_FAILURE);
-	}
-	return 0;
+void print_help(const char *prog_name) {
+	printf(
+		"Usage:\n"
+		"    %s -h\n"
+		"    %s (-e|-d) [-b] -t <file> [-k]\n"
+		"Huffman encode or decode from stdin to stdout"
+		"\n"
+		"\n"
+		"Options:\n"
+		"    -h          print this help and exit\n"
+		"    -e or -d    encode or decode (must be exactly one of them)\n"
+		"    -b          encode using base64 or decode as base64\n"
+		"    -t <file>   huffman tree file (output if encode or input if decode)\n"
+		"    -k          encode huffman tree file using base64 or decode as base64\n",
+		prog_name, prog_name
+	);
 }
+
+int main(int argc, char* argv[]) {
+	bool is_encode = false, is_decode = false, is_base64 = false, is_dhtree_base64 = false;
+	const char *dhtree_fname = NULL;
+	
+	static const char optstring[] = "hedbt:k";
+	while (true) {
+		int c = getopt(argc, argv, optstring);
+		if (c == -1) break;
+		switch (c) {
+			case 'h':
+				print_help(argv[0]);
+				exit(EXIT_SUCCESS);
+				break;
+			case 'e':
+				if (is_decode) goto print_help_and_exit_err;
+				is_encode = true;
+				break;
+			case 'd':
+				if (is_encode) goto print_help_and_exit_err;
+				is_decode = true;
+				break;
+			case 'b':
+				is_base64 = true;
+				break;
+			case 't':
+				dhtree_fname = optarg;
+				break;
+			case 'k':
+				is_dhtree_base64 = true;
+				break;
+			default:
+				goto print_help_and_exit_err;
+		}
+	}
+	if (optind < argc) goto print_help_and_exit_err;
+	if (is_encode == is_decode) goto print_help_and_exit_err;
+	if (dhtree_fname == NULL) goto print_help_and_exit_err;
+	
+	if (is_encode) encode(is_base64, dhtree_fname, is_dhtree_base64);
+	else decode(is_base64, dhtree_fname, is_dhtree_base64);
+	
+	return 0;
+	
+print_help_and_exit_err:
+	print_help(argv[0]);
+	exit(EXIT_FAILURE);
+}
+
