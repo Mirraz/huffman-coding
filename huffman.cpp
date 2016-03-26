@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -73,7 +72,7 @@ void decode(bool is_base64, const char *dhtree_fname, bool is_dhtree_base64) {
 			SymbolBitIn<unsigned char, 8> bit_in(char_in);
 			res = huffman_type::dhtree_decode(bit_in, dhtree);
 		}
-		assert(res);
+		if (!res) {fprintf(stderr, "dhtree decode error\n"); exit(EXIT_FAILURE);}
 		//huffman_type::fprint_dhtree(stderr, dhtree);
 	}
 	if (fclose(dhtree_file)) perror("fclose");
@@ -82,13 +81,15 @@ void decode(bool is_base64, const char *dhtree_fname, bool is_dhtree_base64) {
 		CharSymbolOut<symbol_type, SYMBOL_SIZE> symbol_out(char_out);
 		
 		FileCharIn char_in(stdin);
+		bool res;
 		if (is_base64) {
 			Base64CharBitIn bit_in(char_in);
-			huffman_type::decode(dhtree, bit_in, symbol_out);
+			res = huffman_type::decode(dhtree, bit_in, symbol_out);
 		} else {
 			SymbolBitIn<unsigned char, 8> bit_in(char_in);
-			huffman_type::decode(dhtree, bit_in, symbol_out);
+			res = huffman_type::decode(dhtree, bit_in, symbol_out);
 		}
+		if (!res) {fprintf(stderr, "decode error\n"); exit(EXIT_FAILURE);}
 	}
 }
 

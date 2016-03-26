@@ -203,7 +203,8 @@ static void encode(const symbol_type array[], size_t array_size, IBitOut &bit_ou
 	bit_out.finish();
 }
 
-static void decode(const DHTree &dhtree, IBitIn &bit_in, ISymbolOut<SYMBOL_TYPE> &symbol_out) {
+// returns: whether full bit-stream decoded (indicates wrong input data)
+static bool decode(const DHTree &dhtree, IBitIn &bit_in, ISymbolOut<SYMBOL_TYPE> &symbol_out) {
 	htree_idx_type idx = dhtree.root;
 	while (true) {
 		IBitIn::bit_or_eof_type bit = bit_in.get_with_eof();
@@ -214,7 +215,7 @@ static void decode(const DHTree &dhtree, IBitIn &bit_in, ISymbolOut<SYMBOL_TYPE>
 			idx = dhtree.root;
 		}
 	}
-	assert(idx == dhtree.root);
+	return idx == dhtree.root;
 }
 
 static void fprint_dhtree(FILE *stream, const DHTree &dhtree) {
@@ -298,7 +299,7 @@ static bool dhtree_decode(IBitIn &bit_in, DHTree &dhtree) {
 		if (bit == IBitIn::EOF_VALUE) return false;
 		++symbol_bsize;
 	} while (!bit);
-	assert(sizeof(symbol_type)*8 >= symbol_bsize);
+	if (!(sizeof(symbol_type)*8 >= symbol_bsize)) return false;
 	
 	// decode unary encoded htree_idx_type_bsize-1
 	size_t htree_idx_type_bsize = 0;
@@ -307,7 +308,7 @@ static bool dhtree_decode(IBitIn &bit_in, DHTree &dhtree) {
 		if (bit == IBitIn::EOF_VALUE) return false;
 		++htree_idx_type_bsize;
 	} while (!bit);
-	assert(sizeof(htree_idx_type)*8 >= htree_idx_type_bsize);
+	if (!(sizeof(htree_idx_type)*8 >= htree_idx_type_bsize)) return false;
 	
 	VBitSymbolIn<symbol_type> symbol_in(bit_in, symbol_bsize);
 	VBitSymbolIn<htree_idx_type> htree_idx_in(bit_in, htree_idx_type_bsize);
