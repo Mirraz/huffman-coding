@@ -1,6 +1,7 @@
 #ifndef ARRAY_SYMBOLIO_H
 #define ARRAY_SYMBOLIO_H
 
+#include <assert.h>
 #include <stddef.h>
 #include "isymbolio.h"
 

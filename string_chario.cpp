@@ -1,4 +1,3 @@
-#include <assert.h>
 #include "string_chario.h"
 
 StringCharOut::StringCharOut(unsigned char *b_str, size_t b_size) : array_symbol_out_type(b_str, b_size) {}

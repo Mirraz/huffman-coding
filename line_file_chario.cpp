@@ -1,4 +1,3 @@
-#include <assert.h>
 #include "line_file_chario.h"
 
 LineFileCharOut::LineFileCharOut(FILE *b_stream) : LineFileCharOut(b_stream, 64) {}
