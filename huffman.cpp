@@ -8,6 +8,7 @@
 #include "file_chario.h"
 #include "char_symbolio.h"
 #include "symbol_bitio.h"
+#include "base64_char_bitio.h"
 #include "huffman.h"
 
 typedef uint_fast8_t symbol_type;
@@ -34,14 +35,24 @@ void encode(bool is_base64, const char *dhtree_fname, bool is_dhtree_base64) {
 	dhtree_type dhtree;
 	{
 		FileCharOut char_out(stdout);
-		SymbolBitOut<unsigned char, 8> bit_out(char_out);
-		huffman_type::encode(input_data, input_data_size, bit_out, dhtree);
+		if (is_base64) {
+			Base64CharBitOut bit_out(char_out);
+			huffman_type::encode(input_data, input_data_size, bit_out, dhtree);
+		} else {
+			SymbolBitOut<unsigned char, 8> bit_out(char_out);
+			huffman_type::encode(input_data, input_data_size, bit_out, dhtree);
+		}
 	}
 	{
 		//huffman_type::fprint_dhtree(stderr, dhtree);
 		FileCharOut char_out(dhtree_file);
-		SymbolBitOut<unsigned char, 8> bit_out(char_out);
-		huffman_type::dhtree_encode(dhtree, bit_out, SYMBOL_BSIZE);
+		if (is_dhtree_base64) {
+			Base64CharBitOut bit_out(char_out);
+			huffman_type::dhtree_encode(dhtree, bit_out, SYMBOL_BSIZE);
+		} else {
+			SymbolBitOut<unsigned char, 8> bit_out(char_out);
+			huffman_type::dhtree_encode(dhtree, bit_out, SYMBOL_BSIZE);
+		}
 	}
 	
 	if (fclose(dhtree_file)) perror("fclose");
@@ -54,19 +65,30 @@ void decode(bool is_base64, const char *dhtree_fname, bool is_dhtree_base64) {
 	dhtree_type dhtree;
 	{
 		FileCharIn char_in(dhtree_file);
-		SymbolBitIn<unsigned char, 8> bit_in(char_in);
-		bool res = huffman_type::dhtree_decode(bit_in, dhtree);
+		bool res;
+		if (is_dhtree_base64) {
+			Base64CharBitIn bit_in(char_in);
+			res = huffman_type::dhtree_decode(bit_in, dhtree);
+		} else {
+			SymbolBitIn<unsigned char, 8> bit_in(char_in);
+			res = huffman_type::dhtree_decode(bit_in, dhtree);
+		}
 		assert(res);
 		//huffman_type::fprint_dhtree(stderr, dhtree);
 	}
 	if (fclose(dhtree_file)) perror("fclose");
 	{
-		FileCharIn char_in(stdin);
-		SymbolBitIn<unsigned char, 8> bit_in(char_in);
-		
 		FileCharOut char_out(stdout);
 		CharSymbolOut<symbol_type, SYMBOL_SIZE> symbol_out(char_out);
-		huffman_type::decode(dhtree, bit_in, symbol_out);
+		
+		FileCharIn char_in(stdin);
+		if (is_base64) {
+			Base64CharBitIn bit_in(char_in);
+			huffman_type::decode(dhtree, bit_in, symbol_out);
+		} else {
+			SymbolBitIn<unsigned char, 8> bit_in(char_in);
+			huffman_type::decode(dhtree, bit_in, symbol_out);
+		}
 	}
 }
 
